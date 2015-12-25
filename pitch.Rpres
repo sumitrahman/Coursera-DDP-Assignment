@@ -1,0 +1,70 @@
+Staff survey results for groups and directorates
+========================================================
+author: Sumit Rahman
+date: 21 December 2015
+transition: concave
+font-family: 'Helvetica'
+
+
+Why do we need this app?
+========================================================
+
+Where the author works (BIS) we undertake staff surveys.  Historically, results are presented to senior managers and some high level commentary is shared with the rest of our colleagues.  
+
+I have developed this app which allows any colleague to see the results for their directorate, and compare them with the other directorates in the group, or with all directorates in BIS.  
+
+This way results are shared directly to the whole of BIS and colleagues won't worry that senior managers are cherry-picking the most convenient results to share with everyone else.  
+
+The data
+========================================================
+
+The data are aggregated at directorate, group and BIS level for each theme.  We have standardised these estimates to account for different compositions of junior and senior colleagues in each directorate and group, in order to enable meaningful comparisons to be made.
+
+```{r, echo=FALSE}
+AAA <- read.csv("anondata.csv", header=TRUE)
+AAA$Score<-AAA$Score/100
+AAA$LL<-AAA$LL/100
+AAA$UL<-AAA$UL/100
+AAA$S<-ifelse(
+    substr(AAA$Directorate,1,1)=="D",
+    "D","notD")
+AAA[c(1,2,21,24),1:4]
+```
+
+<small>To make the slide clearer, we have omitted the upper and lower limits of the confidence intervals for each score.  Row 21 of our data is the result for Group 1 as a whole (Directorates 1 and 2 are part of this Group).  Row 24 shows the result for BIS as a whole.</small>
+
+Example of plot where all groups have been selected
+========================================================
+
+```{r, echo=FALSE}
+require("ggplot2")
+require("scales")
+
+ggplot(data=AAA[AAA$Theme=="Theme 1",], aes(y=reorder(Directorate,Score),x=Score,colour=Group,shape=Group))+
+            geom_errorbarh(aes(xmin=LL,xmax=UL),height=0.5,colour="lightgrey")+
+            geom_point(aes(size=S))+
+            scale_shape_manual(values=c(15,16,16,16))+
+            scale_colour_manual(values=c("black","#E69F00","#56B4E9","#D55E00"))+
+            scale_size_manual(values=c("D"=4,"notD"=8))+
+            theme_bw()+
+            ggtitle("Theme 1 scores for all groups and directorates")+
+            guides(colour=guide_legend(title=NULL),size=FALSE,shape=FALSE)+
+            scale_x_continuous(labels=percent,name="theme score")+
+            theme(axis.title.y=element_blank(),
+                  panel.grid.minor.x=element_blank(),
+                  panel.grid.major.x=element_blank(),
+                  panel.grid.major.y=element_line(colour="lightblue",linetype="dotted"),
+                  axis.text.y=element_text(size=rel(1.1)),
+                  legend.position=c(1,0),legend.justification=c(1,0))
+```
+<small>The chart updates instantly if you select a different theme.</small>
+
+Why no microdata?
+========================================================
+type: prompt
+
+These are aggregated scores.  We cannot use individual level microdata in this app because those are confidential survey responses.  If we publish too much detail and make a colleague's responses identifiable then no-one will ever agree to take part in these surveys in the future!  
+
+To see the app, click [here](https://sumitrahman.shinyapps.io/assignment).
+
+To see the code and (aggregated) dataset go to my Git Hub repository [here](https://github.com/sumitrahman/Coursera-DDP-Assignment).
